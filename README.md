@@ -1,4 +1,4 @@
-# The Ultimate React Course 2024: React, Redux & More
+# Node.js, Express, MongoDB & More: The Complete Bootcamp 2024
 
 Course: [Node.js, Express, MongoDB & More: The Complete Bootcamp 2024](https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/)
 
