@@ -1,36 +1,35 @@
 import { createServer } from 'node:http';
 
 import { PORT } from './config';
-import { products } from './products';
+import { apiRoute } from './routes/apiRoute';
+import { createUrl } from './routes/createUrl';
+import { fallbackRoute } from './routes/fallbackRoute';
+import { overviewRoute } from './routes/overviewRoute';
+import { productRoute } from './routes/productRoute';
 
 const server = createServer((request, response) => {
-  console.log(request.url);
-  switch (request.url) {
+  const url = createUrl(request);
+  console.log(url.pathname + url.search);
+
+  switch (url.pathname) {
     case '/':
     case '/overview': {
-      response.end('overview');
+      overviewRoute(request, response);
       return;
     }
 
     case '/product': {
-      response.end('product');
+      productRoute(request, response);
       return;
     }
 
     case '/api': {
-      response
-        .writeHead(200, { 'Content-Type': 'application/json' })
-        .end(JSON.stringify(products));
+      apiRoute(request, response);
       return;
     }
 
     default: {
-      response
-        .writeHead(404, {
-          'Content-Type': 'text/html',
-          'My-Custom-Header': 'my-custom-message',
-        })
-        .end('<h1>Page can not be found!!</h1>');
+      fallbackRoute(request, response);
       return;
     }
   }
