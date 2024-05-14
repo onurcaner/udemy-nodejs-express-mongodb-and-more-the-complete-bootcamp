@@ -1,16 +1,16 @@
-import { ExpressHandler } from './ExpressHandler';
-import { readTours } from './readTours';
+import { ExpressHandler } from '../../global-types';
+import { readTours } from '../../models/tours/readTours';
 
-export const handleTours: ExpressHandler = (_request, response) => {
+export const handleGetTours: ExpressHandler = (_req, res) => {
   readTours()
     .then((tours) => {
-      response.status(200).json({
+      res.status(200).json({
         status: 'success',
         data: { tours, count: tours.length },
       });
     })
     .catch(() => {
-      response.status(500).json({
+      res.status(500).json({
         status: 'error',
         message: 'Can not retrieve tours from server',
       });
