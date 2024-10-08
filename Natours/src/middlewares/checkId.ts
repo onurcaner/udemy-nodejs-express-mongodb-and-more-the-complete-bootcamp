@@ -1,4 +1,4 @@
-import { ExpressHandler } from '../global-types';
+import { ExpressHandler } from '../types/express-types';
 
 export const checkId: ExpressHandler = (req, res, next) => {
   const { id } = req.params;

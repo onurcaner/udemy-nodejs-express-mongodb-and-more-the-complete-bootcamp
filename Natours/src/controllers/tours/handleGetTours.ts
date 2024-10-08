@@ -1,5 +1,5 @@
-import { ExpressHandler } from '../../global-types';
 import { readTours } from '../../models/tours/readTours';
+import { ExpressHandler } from '../../types/express-types';
 
 export const handleGetTours: ExpressHandler = (_req, res) => {
   readTours()
@@ -9,10 +9,11 @@ export const handleGetTours: ExpressHandler = (_req, res) => {
         data: { tours, count: tours.length },
       });
     })
-    .catch(() => {
+    .catch((err: unknown) => {
+      const error = err as Error;
       res.status(500).json({
         status: 'error',
-        message: 'Can not retrieve tours from server',
+        message: error.message,
       });
     });
 };

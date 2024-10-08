@@ -10,4 +10,22 @@ Notes: TypeScript is used instead of JavaScript
 
 ## Projects
 
-### 1. Pizza
+### 1. Node Farm
+
+- Description: Server side rendered non functional website
+
+- Requirements: None
+
+- Environment: Driven by Node, displayed in browser
+
+- Code: [This Repository / Node Farm](./Node%20Farm)
+
+### 1. Natours
+
+- Description: TODO
+
+- Requirements: None
+
+- Environment: Driven by Node, displayed in browser
+
+- Code: [This Repository / Natours](./Natours)
