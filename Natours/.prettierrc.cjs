@@ -1,8 +1,11 @@
 module.exports = {
   singleQuote: true,
-  trailingComma: "all",
-  importOrder: ["^@core/(.*)$", "^@server/(.*)$", "^@ui/(.*)$", "^[./]"],
+  trailingComma: 'all',
+  importOrder: [
+    '^(w|@w)', // node_modules
+    '^(./|../|@/|/)', // local
+  ],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
-  plugins: ["@trivago/prettier-plugin-sort-imports"],
+  plugins: ['@trivago/prettier-plugin-sort-imports'],
 };

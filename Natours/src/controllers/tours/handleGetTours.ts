@@ -1,19 +1,23 @@
-import { readTours } from '../../models/tours/readTours';
+import { toursModel } from '../../models/tours/ToursModel';
 import { ExpressHandler } from '../../types/express-types';
 
 export const handleGetTours: ExpressHandler = (_req, res) => {
-  readTours()
+  toursModel
+    .getAll()
     .then((tours) => {
       res.status(200).json({
         status: 'success',
-        data: { tours, count: tours.length },
+        data: {
+          tours,
+        },
       });
     })
     .catch((err: unknown) => {
-      const error = err as Error;
       res.status(500).json({
         status: 'error',
-        message: error.message,
+        data: {
+          err,
+        },
       });
     });
 };
