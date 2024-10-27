@@ -12,16 +12,39 @@ export class ToursModel {
       .collection<TourTypes['Tour']>(CollectionNames.Tours);
   }
 
+  // get
   async getAll() {
-    return await this.collection.find({}).toArray();
+    const tours = await this.collection.find({}).toArray();
+    const parsedTours = tours.map((tour) => TourSchemas.Tour.parse(tour));
+    return parsedTours;
   }
 
   async getByName(name: string) {
-    return await this.collection.findOne({ name });
+    const tour = await this.collection.findOne({ name });
+    if (!tour) return tour;
+
+    const parsedTour = TourSchemas.Tour.parse(tour);
+    return parsedTour;
   }
 
+  async getById(id: string) {
+    if (!ObjectId.isValid(id)) throw new Error('id is not a valid ObjectId');
+
+    const tour = await this.collection.findOne({ _id: id });
+    if (!tour) return tour;
+
+    const parsedTour = TourSchemas.Tour.parse(tour);
+    return parsedTour;
+  }
+
+  // insert
   async insertOne(tour: TourTypes['CreateTour']) {
-    const existingTourWithSameName = await this.getByName(tour.name);
+    const existingTourWithSameName = await this.collection.findOne(
+      {
+        name: tour.name,
+      },
+      { projection: { name: 1 } },
+    );
     if (existingTourWithSameName)
       throw new Error(
         `tour name is unique. "${tour.name}" has already existing`,
@@ -37,7 +60,26 @@ export class ToursModel {
   }
 
   async insertMany(tours: TourTypes['CreateTour'][]) {
-    return await Promise.all(tours.map((tour) => this.insertOne(tour)));
+    const alreadyInsertedTours = await this.collection
+      .find(
+        {
+          $or: tours.map((tour) => ({ name: tour.name })),
+        },
+        {
+          projection: { name: 1 },
+        },
+      )
+      .toArray();
+    if (alreadyInsertedTours.length > 0)
+      throw new Error(
+        `tour name is unique. "${alreadyInsertedTours.map(({ name }) => name).join(' ___ ')}" have already existing`,
+      );
+
+    const parsedTours = tours.map((tour) => TourSchemas.CreateTour.parse(tour));
+    const insertedTours = this.collection.insertMany(
+      parsedTours.map((parsedTour) => ({ ...parsedTour, _id: new ObjectId() })),
+    );
+    return insertedTours;
   }
 }
 

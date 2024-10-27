@@ -1,5 +1,6 @@
-import { toursModel } from '../../models/tours/ToursModel';
+import { toursModel } from '../../models/tours/toursModel';
 import { ExpressHandler } from '../../types/express-types';
+import { createMessageFromError } from '../utils/createMessageFromError';
 
 export const handleGetTours: ExpressHandler = (_req, res) => {
   toursModel
@@ -15,9 +16,7 @@ export const handleGetTours: ExpressHandler = (_req, res) => {
     .catch((err: unknown) => {
       res.status(500).json({
         status: 'error',
-        data: {
-          err,
-        },
+        message: createMessageFromError(err),
       });
     });
 };
