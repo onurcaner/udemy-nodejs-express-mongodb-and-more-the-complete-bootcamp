@@ -8,5 +8,5 @@ if (!password)
   throw new Error('MONGODB_ATLAS_PASSWORD can not be found in .env');
 
 export const mongoClient = new MongoClient(
-  url.replace('<MONGODB_PASSWORD>', password),
+  url.replace('<db_password>', password),
 );

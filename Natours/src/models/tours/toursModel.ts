@@ -21,17 +21,17 @@ export class ToursModel {
 
   async getByName(name: string) {
     const tour = await this.collection.findOne({ name });
-    if (!tour) return tour;
+    if (!tour) throw new Error(`Can not find a tour with name: ${name}`);
 
     const parsedTour = TourSchemas.Tour.parse(tour);
     return parsedTour;
   }
 
   async getById(id: string) {
-    if (!ObjectId.isValid(id)) throw new Error('id is not a valid ObjectId');
+    if (!ObjectId.isValid(id)) throw new Error('id is not a valid id');
 
-    const tour = await this.collection.findOne({ _id: id });
-    if (!tour) return tour;
+    const tour = await this.collection.findOne({ _id: new ObjectId(id) });
+    if (!tour) throw new Error(`Can not find a tour with id: ${id}`);
 
     const parsedTour = TourSchemas.Tour.parse(tour);
     return parsedTour;
@@ -47,7 +47,7 @@ export class ToursModel {
     );
     if (existingTourWithSameName)
       throw new Error(
-        `tour name is unique. "${tour.name}" has already existing`,
+        `Tour name is unique. "${tour.name}" has already existing`,
       );
 
     const parsedTour = TourSchemas.CreateTour.parse(tour);
@@ -72,7 +72,7 @@ export class ToursModel {
       .toArray();
     if (alreadyInsertedTours.length > 0)
       throw new Error(
-        `tour name is unique. "${alreadyInsertedTours.map(({ name }) => name).join(' ___ ')}" have already existing`,
+        `Tour name is unique. "${alreadyInsertedTours.map(({ name }) => name).join(' ___ ')}" have already existing`,
       );
 
     const parsedTours = tours.map((tour) => TourSchemas.CreateTour.parse(tour));
