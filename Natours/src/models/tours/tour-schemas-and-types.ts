@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { LocationSchema } from '../locations/LocationSchema';
 import {
   addressSchema,
   dateStringSchema,
@@ -14,7 +13,8 @@ import {
   priceSchema,
   quantitySchema,
   ratingSchema,
-} from '../property-schemas';
+} from '../_constants/property-schemas';
+import { locationSchema } from '../locations/locationSchema';
 
 const startDatesSchema = z.array(dateStringSchema).min(1).max(20);
 
@@ -23,7 +23,7 @@ const startLocationSchema = z
     address: addressSchema,
     description: descriptionSchema,
   })
-  .merge(LocationSchema)
+  .merge(locationSchema)
   .omit({ _id: true });
 
 const tourLocationSchema = z
@@ -31,9 +31,9 @@ const tourLocationSchema = z
     day: durationSchema,
     description: descriptionSchema,
   })
-  .merge(LocationSchema);
+  .merge(locationSchema);
 
-const TourSchema = z.object({
+export const TourSchema = z.object({
   _id: idSchema,
   duration: durationSchema,
   description: descriptionSchema,
@@ -52,12 +52,9 @@ const TourSchema = z.object({
   summary: descriptionSchema,
 });
 
-export const TourSchemas = {
-  Tour: TourSchema,
-  CreateTour: TourSchema.omit({ _id: true }),
-};
+export const CreateTourSchema = TourSchema.omit({ _id: true });
+export const UpdateTourSchema = TourSchema.omit({ _id: true }).partial();
 
-export interface TourTypes {
-  Tour: z.infer<typeof TourSchemas.Tour>;
-  CreateTour: z.infer<typeof TourSchemas.CreateTour>;
-}
+export type TourAttributes = z.infer<typeof TourSchema>;
+export type CreateTourAttributes = z.infer<typeof CreateTourSchema>;
+export type UpdateTourAttributes = z.infer<typeof UpdateTourSchema>;

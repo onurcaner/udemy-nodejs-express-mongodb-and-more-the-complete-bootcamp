@@ -1,22 +1,21 @@
+import { createToursFilter } from '../../models/tours/createToursFilter';
 import { toursModel } from '../../models/tours/toursModel';
-import { ExpressHandler } from '../../types/express-types';
-import { createMessageFromError } from '../utils/createMessageFromError';
+import { type ExpressHandler } from '../../types/express-types';
+import { createToursJSend } from '../../views/tours/createToursJSend';
+import { handleError } from '../_utils/handleError';
 
-export const handleGetTours: ExpressHandler = (_req, res) => {
-  toursModel
-    .getAll()
-    .then((tours) => {
-      res.status(200).json({
-        status: 'success',
-        data: {
-          tours,
-        },
-      });
-    })
-    .catch((err: unknown) => {
-      res.status(500).json({
-        status: 'error',
-        message: createMessageFromError(err),
-      });
-    });
+export const handleGetTours: ExpressHandler = (req, res) => {
+  const asyncHandler = async () => {
+    try {
+      const { query } = req;
+      const filter = createToursFilter(query);
+      const tours = await toursModel.findAll(filter);
+      const json = createToursJSend(tours);
+      res.status(200).json(json);
+    } catch (err: unknown) {
+      handleError({ err, res });
+    }
+  };
+
+  void asyncHandler();
 };

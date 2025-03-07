@@ -1,12 +1,10 @@
 import { MongoClient } from 'mongodb';
-import { env } from 'node:process';
 
-const url = env.MONGODB_ATLAS_URL;
-if (!url) throw new Error('MONGODB_ATLAS_URL can not be found in .env');
-const password = env.MONGODB_ATLAS_PASSWORD;
-if (!password)
-  throw new Error('MONGODB_ATLAS_PASSWORD can not be found in .env');
+import { typedEnv } from '../constants/typedEnv';
+
+const url = typedEnv.MONGODB_ATLAS_URL;
+const password = typedEnv.MONGODB_ATLAS_PASSWORD;
 
 export const mongoClient = new MongoClient(
-  url.replace('<db_password>', password),
+  url.replace('<MONGODB_PASSWORD>', password),
 );

@@ -4,14 +4,14 @@ import {
   coordinateTypeSchema,
   idSchema,
   pointCoordinatesSchema,
-} from '../property-schemas';
+} from '../_constants/property-schemas';
 
 const pointSchema = z.object({
   coordinates: pointCoordinatesSchema,
   type: coordinateTypeSchema.extract(['point']),
 });
 
-export const LocationSchema = z
+export const locationSchema = z
   .object({
     _id: idSchema,
   })

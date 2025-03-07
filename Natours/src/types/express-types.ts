@@ -1,9 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
-
-type RequestWithParams = Request & Pick<Request, 'params'>;
-interface RequestWithIdParams extends RequestWithParams {
-  params: { id: string };
-}
+import { type NextFunction, type Request, type Response } from 'express';
 
 export type ExpressHandler = (
   req: Request,
@@ -11,14 +6,20 @@ export type ExpressHandler = (
   next: NextFunction,
 ) => void;
 
-export type ExpressHandlerWithParams = (
-  req: RequestWithParams,
+export type ExpressHandlerWithBody<T> = (
+  req: Request<null, null, T>,
   res: Response,
   next: NextFunction,
 ) => void;
 
 export type ExpressHandlerWithIdParams = (
-  req: RequestWithIdParams,
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) => void;
+
+export type ExpressHandlerWithIdParamsAndBody<T> = (
+  req: Request<{ id: string }, null, T>,
   res: Response,
   next: NextFunction,
 ) => void;

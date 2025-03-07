@@ -1,4 +1,4 @@
-import { ROOT } from '../ROOT';
+import { ROOT } from '../constants/ROOT';
 
 const dataFolder = `${ROOT}/dev-data/data`;
 
