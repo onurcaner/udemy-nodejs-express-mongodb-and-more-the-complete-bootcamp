@@ -7,7 +7,7 @@ export const handleDeleteTour: ExpressHandlerWithIdParams = (req, res) => {
   const asyncHandler = async () => {
     try {
       const { id } = req.params;
-      await toursModel.deleteTour(id);
+      await toursModel.delete(id);
       const json: JSendObject = {
         status: 'success',
         data: {},

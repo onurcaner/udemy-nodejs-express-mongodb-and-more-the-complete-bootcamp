@@ -1,4 +1,4 @@
-import { Filter, MongoClient, ObjectId } from 'mongodb';
+import { Filter, MongoClient, ObjectId, Sort } from 'mongodb';
 
 import { Model } from '../Model';
 import { CollectionNames } from '../_constants/CollectionNames';
@@ -18,10 +18,18 @@ export class ToursModel extends Model<TourAttributes> {
   }
 
   // find
-  async findAll(
-    filter: Filter<TourAttributes> = {},
-  ): Promise<TourAttributes[]> {
-    const tours = await this.collection.find().filter(filter).toArray();
+  async findAll({
+    filter,
+    sort,
+  }: {
+    filter?: Filter<TourAttributes> | null;
+    sort?: Sort | null;
+  }): Promise<TourAttributes[]> {
+    let toursFindCursor = this.collection.find();
+    if (filter) toursFindCursor = toursFindCursor.filter(filter);
+    if (sort) toursFindCursor = toursFindCursor.sort(sort);
+
+    const tours = await toursFindCursor.toArray();
     const parsedTours = tours.map((tour) => TourSchema.parse(tour));
     return parsedTours;
   }
@@ -117,7 +125,7 @@ export class ToursModel extends Model<TourAttributes> {
   }
 
   // update
-  async updateTour(
+  async update(
     id: string,
     updateTourFields: UpdateTourAttributes,
   ): Promise<TourAttributes> {
@@ -140,7 +148,7 @@ export class ToursModel extends Model<TourAttributes> {
   }
 
   // delete
-  async deleteTour(id: string): Promise<TourAttributes> {
+  async delete(id: string): Promise<TourAttributes> {
     this.validateObjectId(id);
 
     const deletedTour = await this.findById(id);

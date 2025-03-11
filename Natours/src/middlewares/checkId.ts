@@ -1,16 +1,13 @@
 import { type ExpressHandler } from '../types/express-types';
+import { createGenericJSendError } from '../views/_utils/createGenericJSendError';
 
 export const checkId: ExpressHandler = (req, res, next) => {
   const { id } = req.params;
+
   if (!id) {
-    const message = 'id param is missing in URL';
-    res.status(400).json({
-      status: 'fail',
-      message,
-      data: {
-        id: message,
-      },
-    });
+    const message = 'id param is not OK, is empty';
+    const json = createGenericJSendError(message);
+    res.status(500).json(json);
     return;
   }
 

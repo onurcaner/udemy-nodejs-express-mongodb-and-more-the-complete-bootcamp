@@ -11,7 +11,7 @@ export const handleUpdateTour: ExpressHandlerWithIdParamsAndBody<
     try {
       const { id } = req.params;
       const updateTourFields = req.body;
-      const updatedTour = await toursModel.updateTour(id, updateTourFields);
+      const updatedTour = await toursModel.update(id, updateTourFields);
       const json = createTourJSend(updatedTour);
       res.status(200).send(json);
     } catch (err: unknown) {

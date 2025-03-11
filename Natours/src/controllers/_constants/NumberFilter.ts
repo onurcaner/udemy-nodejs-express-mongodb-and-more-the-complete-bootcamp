@@ -10,14 +10,11 @@ const lteSchema = z.union([
   z.object({ lt: stringNumberSchema, lte: z.undefined() }),
   z.object({ lte: stringNumberSchema, lt: z.undefined() }),
 ]);
-export const stringNumberFilterSchema = z.union([
+
+export const numberFilterSchema = z.union([
   stringNumberSchema,
   gteSchema,
   lteSchema,
   z.intersection(gteSchema, lteSchema),
-  z.undefined(),
 ]);
-
-/* export type Gte = z.infer<typeof gteSchema>;
-export type Lte = z.infer<typeof lteSchema>; */
-export type StringNumberFilter = z.infer<typeof stringNumberFilterSchema>;
+export type NumberFilter = z.infer<typeof numberFilterSchema>;

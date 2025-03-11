@@ -14,7 +14,7 @@ import {
   quantitySchema,
   ratingSchema,
 } from '../_constants/property-schemas';
-import { locationSchema } from '../locations/locationSchema';
+import { locationSchema } from '../locations/LocationSchema';
 
 const startDatesSchema = z.array(dateStringSchema).min(1).max(20);
 
