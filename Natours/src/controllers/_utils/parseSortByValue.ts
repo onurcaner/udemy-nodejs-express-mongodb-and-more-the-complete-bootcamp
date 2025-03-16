@@ -1,6 +1,13 @@
 import { validSortOrders } from '../_constants/validSortOrders';
 
-export function parseSortBy(sortBy: string): Record<string, 1 | -1> | null {
+/**
+ *
+ * @param sortBy string like "by_price.asc,average_rating.dsc"
+ * @returns "{ by_price: 1, average_rating: -1 }"
+ */
+export function parseSortByValue(
+  sortBy: string,
+): Record<string, 1 | -1> | null {
   if (!sortBy) return null;
 
   const entries: [string, 1 | -1][] = sortBy
