@@ -1,19 +1,22 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { parseSortByValue } from './parseSortByValue';
 
 describe('parseSortByValue()', () => {
   describe('return null', () => {
-    it('if empty input is passed as argument', () => {
+    test('input string is empty string', () => {
+      // Arrange
       const expectedResult: ReturnType<typeof parseSortByValue> = null;
       const sortByValue = '';
 
+      //Act
       const actualResult = parseSortByValue(sortByValue);
 
+      // Assert
       expect(actualResult).toBe(expectedResult);
     });
 
-    it('if input contains single sort field and without the ". dot"', () => {
+    test('input string contains single sort field AND without the ". dot"', () => {
       const expectedResult: ReturnType<typeof parseSortByValue> = null;
       const sortByValue = 'price';
 
@@ -22,90 +25,106 @@ describe('parseSortByValue()', () => {
       expect(actualResult).toBe(expectedResult);
     });
 
-    it('if input contains single sort field and without the ".asc" OR ".desc"', () => {
-      const sortByValues: string[] = [
-        'price.inc',
-        'price.dec',
-        'price.low_to_high',
-        'price.high_to_low',
-      ];
-      const expectedResult: ReturnType<typeof parseSortByValue> = null;
-      sortByValues.forEach((sortByValue) => {
+    test.each([
+      { sortByValue: 'price.inc' },
+      { sortByValue: 'price.dec' },
+      { sortByValue: 'price.low_to_high' },
+      { sortByValue: 'price.high_to_low' },
+    ])(
+      'input: $sortByValue contains incorrect sortBy enum',
+      ({ sortByValue }) => {
+        // Arrange
+        const expectedResult: ReturnType<typeof parseSortByValue> = null;
+
+        // Act
         const actualResult = parseSortByValue(sortByValue);
 
+        // Assert
         expect(actualResult).toBe(expectedResult);
-      });
-    });
+      },
+    );
 
-    it('if input contains gibberish with "," and ".anything"', () => {
-      const sortByValues: string[] = ['.asc', '.desc', '..,,,.,,,.asc,.desc'];
+    test.each([
+      { sortByValue: '.asc' },
+      { sortByValue: '.desc' },
+      { sortByValue: '..,,,.,,,.asc,.desc' },
+    ])('input: $sortByValue lack sortByField', ({ sortByValue }) => {
+      // Arrange
       const expectedResult: ReturnType<typeof parseSortByValue> = null;
-      sortByValues.forEach((sortByValue) => {
-        const actualResult = parseSortByValue(sortByValue);
 
-        expect(actualResult).toBe(expectedResult);
-      });
+      // Act
+      const actualResult = parseSortByValue(sortByValue);
+
+      // Assert
+      expect(actualResult).toBe(expectedResult);
     });
   });
 
   describe('return object with single field', () => {
-    it('if input contains a single valid sort field', () => {
+    test.each<{
+      sortByValue: string;
+      expectedResult: ReturnType<typeof parseSortByValue>;
+    }>([
+      { sortByValue: 'price.asc', expectedResult: { price: 1 } },
       {
-        const expectedResult: ReturnType<typeof parseSortByValue> = {
-          price: 1,
-        };
-        const sortByValue = 'price.asc';
-
+        sortByValue: 'average_rating.desc',
+        expectedResult: { average_rating: -1 },
+      },
+    ])(
+      'if input: $sortByValue contains a single valid sort field',
+      ({ sortByValue, expectedResult }) => {
+        // Act
         const actualValue = parseSortByValue(sortByValue);
 
+        // Assert
         expect(actualValue).toStrictEqual(expectedResult);
-      }
-      {
-        const expectedResult: ReturnType<typeof parseSortByValue> = {
-          average_rating: -1,
-        };
-        const sortByValue = 'average_rating.desc';
+      },
+    );
 
-        const actualValue = parseSortByValue(sortByValue);
-
-        expect(actualValue).toStrictEqual(expectedResult);
-      }
-    });
-
-    it('if input contains many but only one valid sort fields', () => {
+    test('if input contains many but only one valid sort fields', () => {
+      // Arrange
       const expectedResult: ReturnType<typeof parseSortByValue> = {
         price: 1,
       };
-      const sortByValue = ',,price,,price.asc,,.,..,.asc,.desc,,.+,.-,';
+      const sortByValue =
+        ',,price,,price.asc,,.,..,.asc,.desc,,price.+,price.-,';
 
+      // Act
       const actualValue = parseSortByValue(sortByValue);
 
+      // Assert
       expect(actualValue).toStrictEqual(expectedResult);
     });
   });
 
   describe('return object with many fields', () => {
-    it('if input contains many valid sort fields', () => {
+    test('if input contains many valid sort fields', () => {
+      // Arrange
       const expectedValue: ReturnType<typeof parseSortByValue> = {
         price: 1,
         average_rating: -1,
       };
       const sortByValue = 'price.asc,average_rating.desc';
 
+      // Act
       const actualResult = parseSortByValue(sortByValue);
 
+      // Assert
       expect(actualResult).toStrictEqual(expectedValue);
     });
 
-    it('if input contains many valid sort fields with many invalid sort fields', () => {
+    test('if input contains many valid sort fields with many invalid sort fields', () => {
+      // Arrange
       const expectedValue: ReturnType<typeof parseSortByValue> = {
         price: 1,
         average_rating: -1,
       };
       const sortByValue = ',.,..,stars,,price.asc,average_rating.desc,stars.+';
 
+      // Act
       const actualResult = parseSortByValue(sortByValue);
 
+      // Assert
       expect(actualResult).toStrictEqual(expectedValue);
     });
   });
