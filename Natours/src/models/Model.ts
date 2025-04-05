@@ -1,20 +1,10 @@
-import { Collection, MongoClient, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
-export abstract class Model<T extends Record<'_id', string | ObjectId>> {
-  protected collection: Collection<T>;
+import { InvalidIdError } from './_constants/Errors';
 
-  constructor({
-    mongoClient,
-    collectionName,
-  }: {
-    mongoClient: MongoClient;
-    collectionName: string;
-  }) {
-    this.collection = mongoClient.db().collection<T>(collectionName);
-  }
-
+export class Model {
   protected validateObjectId(id: string): void {
     if (ObjectId.isValid(id)) return;
-    else throw new Error(`id: ${id} is not a valid ObjectId`);
+    else throw new InvalidIdError(`id: ${id} is not a valid ObjectId`);
   }
 }

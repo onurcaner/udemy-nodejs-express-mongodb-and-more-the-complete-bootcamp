@@ -1,8 +1,7 @@
-import { Filter, MongoClient, ObjectId, Sort } from 'mongodb';
+import { Filter, Sort } from 'mongodb';
 
 import { Model } from '../Model';
-import { CollectionNames } from '../_constants/CollectionNames';
-import { mongoClient } from '../mongoClient';
+import { NotFoundError } from '../_constants/Errors';
 import {
   type CreateTourAttributes,
   CreateTourSchema,
@@ -11,151 +10,121 @@ import {
   type UpdateTourAttributes,
   UpdateTourSchema,
 } from './tour-schemas-and-types';
+import { toursRepository } from './toursRepository';
 
-export class ToursModel extends Model<TourAttributes> {
-  constructor(mongoClient: MongoClient) {
-    super({ mongoClient, collectionName: CollectionNames.Tours });
-  }
+export class ToursModel extends Model {
+  private repository = toursRepository;
 
-  // find
-  async findAll({
-    filter,
-    sort,
-  }: {
+  async findAll(options: {
     filter?: Filter<TourAttributes> | null;
     sort?: Sort | null;
   }): Promise<TourAttributes[]> {
-    let toursFindCursor = this.collection.find();
-    if (filter) toursFindCursor = toursFindCursor.filter(filter);
-    if (sort) toursFindCursor = toursFindCursor.sort(sort);
+    // Find
+    const tours = await this.repository.findAll(options);
 
-    const tours = await toursFindCursor.toArray();
+    // Parse output
     const parsedTours = tours.map((tour) => TourSchema.parse(tour));
     return parsedTours;
   }
 
   async findByName(name: string): Promise<TourAttributes> {
-    const tour = await this.collection.findOne({ name });
-    if (!tour) throw new Error(`Can not find a tour with name: ${name}`);
+    // Find
+    const tour = await this.repository.findByName(name);
+    if (!tour)
+      throw new NotFoundError(`Can not find a tour with name: ${name}`);
 
+    // Parse output
     const parsedTour = TourSchema.parse(tour);
     return parsedTour;
   }
 
   async findById(id: string): Promise<TourAttributes> {
+    // Validate
     this.validateObjectId(id);
 
-    const tour = await this.collection.findOne({ _id: new ObjectId(id) });
-    if (!tour) throw new Error(`Can not find a tour with id: ${id}`);
+    // Find
+    const tour = await this.repository.findById(id);
+    if (!tour) throw new NotFoundError(`Can not find a tour with id: ${id}`);
 
+    // Parse
     const parsedTour = TourSchema.parse(tour);
     return parsedTour;
   }
 
   async findByNames(names: string[]): Promise<TourAttributes[]> {
-    const tours = await this.collection
-      .find({
+    // Find
+    const tours = await this.repository.findAll({
+      filter: {
         $or: names.map((name) => ({ name })),
-      })
-      .toArray();
+      },
+    });
 
+    // Parse
     const parsedTours = tours.map((tour) => TourSchema.parse(tour));
     return parsedTours;
   }
 
-  // insert
   async insertOne(
-    createTourFields: CreateTourAttributes,
+    createTourAttributes: CreateTourAttributes,
   ): Promise<TourAttributes> {
-    const existingTourWithSameName = await this.collection.findOne(
-      {
-        name: createTourFields.name,
-      },
-      { projection: { name: 1 } },
+    // Validate
+    const parsedCreateTourAttributes =
+      CreateTourSchema.parse(createTourAttributes);
+
+    // Insert
+    const insertedTour = await this.repository.insertOne(
+      parsedCreateTourAttributes,
     );
-    if (existingTourWithSameName)
-      throw new Error(
-        `Tour name is unique. "${createTourFields.name}" has already existing`,
-      );
 
-    const parsedCreateTourFields = CreateTourSchema.parse(createTourFields);
-    const insertedTourId = new ObjectId();
-    await this.collection.insertOne({
-      ...parsedCreateTourFields,
-      _id: insertedTourId,
-    });
-
-    const insertedTour = await this.findById(insertedTourId.toString());
-    return insertedTour;
+    // Parse
+    const parsedTour = TourSchema.parse(insertedTour);
+    return parsedTour;
   }
 
   async insertMany(
     createTourFieldsCollection: CreateTourAttributes[],
   ): Promise<TourAttributes[]> {
-    const alreadyInsertedTours = await this.collection
-      .find(
-        {
-          $or: createTourFieldsCollection.map(({ name }) => ({ name })),
-        },
-        {
-          projection: { name: 1 },
-        },
-      )
-      .toArray();
-    if (alreadyInsertedTours.length > 0)
-      throw new Error(
-        `Tour name is unique. "${alreadyInsertedTours.map(({ name }) => name).join(' ___ ')}" have already existing`,
-      );
-
-    const parsedCreateTourFieldsCollection = createTourFieldsCollection.map(
+    // Validate
+    const parsedCreateTourAttributesCollection = createTourFieldsCollection.map(
       (createTourFields) => CreateTourSchema.parse(createTourFields),
     );
-    await this.collection.insertMany(
-      parsedCreateTourFieldsCollection.map((parsedTour) => ({
-        ...parsedTour,
-        _id: new ObjectId(),
-      })),
+
+    // Insert
+    const insertedTours = await this.repository.insertMany(
+      parsedCreateTourAttributesCollection,
     );
 
-    const insertedTourNames = parsedCreateTourFieldsCollection.map(
-      ({ name }) => name,
+    // Parse
+    const parsedInsertedTours = insertedTours.map((insertedTour) =>
+      TourSchema.parse(insertedTour),
     );
-    const insertedTours = await this.findByNames(insertedTourNames);
-    return insertedTours;
+    return parsedInsertedTours;
   }
 
-  // update
   async update(
     id: string,
     updateTourFields: UpdateTourAttributes,
   ): Promise<TourAttributes> {
+    // Validate
     this.validateObjectId(id);
-
-    const tour = await this.collection.findOne(
-      { _id: new ObjectId(id) },
-      { projection: { name: 1 } },
-    );
-    if (!tour) throw new Error(`Can not find a tour with id: ${id}`);
-
     const parsedUpdateFields = UpdateTourSchema.parse(updateTourFields);
-    await this.collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: parsedUpdateFields },
-    );
 
-    const updatedTour = await this.findById(id);
-    return updatedTour;
+    // Update
+    const updatedTour = await this.repository.update(id, parsedUpdateFields);
+
+    // Parse
+    const parsedUpdatedTour = TourSchema.parse(updatedTour);
+    return parsedUpdatedTour;
   }
 
   // delete
-  async delete(id: string): Promise<TourAttributes> {
+  async delete(id: string): Promise<void> {
+    // Validate
     this.validateObjectId(id);
 
-    const deletedTour = await this.findById(id);
-    await this.collection.deleteOne({ _id: deletedTour._id });
-
-    return deletedTour;
+    // Delete
+    await this.repository.delete(id);
   }
 }
 
-export const toursModel = new ToursModel(mongoClient);
+export const toursModel = new ToursModel();

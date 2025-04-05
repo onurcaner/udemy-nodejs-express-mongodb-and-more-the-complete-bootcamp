@@ -4,22 +4,22 @@ export type ExpressHandler = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => void;
+) => void | Promise<void>;
 
 export type ExpressHandlerWithBody<T> = (
   req: Request<null, null, T>,
   res: Response,
   next: NextFunction,
-) => void;
+) => void | Promise<void>;
 
 export type ExpressHandlerWithIdParams = (
   req: Request<{ id: string }>,
   res: Response,
   next: NextFunction,
-) => void;
+) => void | Promise<void>;
 
 export type ExpressHandlerWithIdParamsAndBody<T> = (
   req: Request<{ id: string }, null, T>,
   res: Response,
   next: NextFunction,
-) => void;
+) => void | Promise<void>;

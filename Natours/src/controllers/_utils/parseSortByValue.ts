@@ -2,7 +2,7 @@ import { validSortOrders } from '../_constants/validSortOrders';
 
 /**
  *
- * @param sortBy string like "by_price.asc,average_rating.dsc"
+ * @param sortBy string like "by_price.asc,average_rating.desc"
  * @returns "{ by_price: 1, average_rating: -1 }"
  */
 export function parseSortByValue(

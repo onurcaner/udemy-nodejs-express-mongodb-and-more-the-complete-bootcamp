@@ -1,23 +1,24 @@
 import { type Response } from 'express';
-import { type ZodError } from 'zod-validation-error';
 
-import { createFailDataFromZodError } from '../../views/_utils/createFailDataFromZodError';
+import { createGenericJSendError } from '../../views/_utils/createGenericJSendError';
 import { createGenericJSendFail } from '../../views/_utils/createGenericJSendFail';
 import { createMessageFromError } from '../../views/_utils/createMessageFromError';
 import { createStatusCodeFromError } from './createStatusCodeFromError';
 
-export function handleZodError({
+export function handleGenericError({
   err,
   res,
   status,
 }: {
   res: Response;
-  err: ZodError;
+  err: unknown;
   status?: number;
 }): void {
   const statusCode = status ?? createStatusCodeFromError(err);
-  const data = createFailDataFromZodError(err);
   const message = createMessageFromError(err);
-  const json = createGenericJSendFail(data, message);
+  const json =
+    statusCode >= 500
+      ? createGenericJSendError(message)
+      : createGenericJSendFail({}, message);
   res.status(statusCode).json(json);
 }
